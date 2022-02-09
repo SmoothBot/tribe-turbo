@@ -1,0 +1,37 @@
+
+project_structure:
+  build: build
+  contracts: src
+  interfaces: interfaces
+  reports: reports
+  scripts: scripts
+  tests: tests
+# use Ganache's forked mainnet mode as the default network
+# NOTE: You don't *have* to do this, but it is often helpful for testing
+networks:
+  default: mainnet-fork
+
+# automatically fetch contract sources from Etherscan
+autofetch_sources: True
+
+# require OpenZepplin Contracts
+dependencies:
+  - smoothbot/solmate@0.0.1
+  - smoothbot/libcompound@0.0.1
+
+# path remapping to support imports from GitHub/NPM
+compiler:
+  solc:
+    version: 0.8.10
+    optimizer:
+        enabled: true
+        runs: 200
+    remappings:
+      - "solmate=smoothbot/solmate@0.0.1/contracts/"
+      - "libcompound=smoothbot/libcompound@0.0.1/src/"
+
+reports:
+  exclude_contracts:
+    - SafeMath
+    - SafeERC20
+    - Address
