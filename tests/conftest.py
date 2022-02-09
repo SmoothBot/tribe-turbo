@@ -33,12 +33,19 @@ def fuse_pool_directory():
 def fei(interface):
     yield interface.ERC20('0x956F47F50A910163D8BF957Cf5846D573E7f87CA')
 
+@pytest.fixture
+def fei(interface):
+    yield interface.ERC20('0x956F47F50A910163D8BF957Cf5846D573E7f87CA')
+
+@pytest.fixture
+def uni(interface):
+    yield interface.ERC20('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
 @pytest.fixture
 def turbo_pool(fuse_pool_directory, fuse_comptroller, fuse_oracle, owner):
     close_factor = int(0.50 * 1e18) # 50%
     liquidation_incentive = int(1 * 1e18) # 1%
-    pool = fuse_pool_directory.deployPool(
+    tx = fuse_pool_directory.deployPool(
         'Turbo Master Pool', 
         fuse_comptroller, 
         True, 
@@ -47,7 +54,12 @@ def turbo_pool(fuse_pool_directory, fuse_comptroller, fuse_oracle, owner):
         fuse_oracle,
         {'from': owner}
     )
-    yield pool.events['PoolRegistered']['pool'][2]
+    addr = (tx.events['PoolRegistered']['pool'][2])
+    pool = Contract.from_abi("Comptroller", addr, fuse_comptroller.abi)
+
+    # TODO - Deploy CToken for fei and add market to our new fuse pool!??
+
+    yield pool
 
 
 @pytest.fixture
