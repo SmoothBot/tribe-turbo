@@ -1,5 +1,4 @@
 import pytest
-from brownie import config
 from brownie import Contract
 
 
@@ -9,8 +8,8 @@ def owner(accounts):
 
 
 @pytest.fixture
-def auth(accounts):
-    yield accounts[1]
+def auth(MockAuthority, owner):
+    yield MockAuthority.deploy(owner, {'from': owner})
 
 
 # Rari contract addresses: https://docs.rari.capital/contracts/#rari-governance
@@ -61,7 +60,9 @@ def turbo_pool(fuse_pool_directory, fuse_comptroller, fuse_oracle, owner):
 
     yield pool
 
-
 @pytest.fixture
-def turbo_master(TurboMaster, turbo_pool, fei, owner, auth):
-    yield TurboMaster.deploy(turbo_pool, fei, owner, auth, {'from': owner})
+def turbo_master(TurboMaster, MockComptroller, fei, owner, auth):
+    mock_comptroller = MockComptroller.deploy({'from': owner})
+    turboMaster = TurboMaster.deploy(mock_comptroller, fei, owner, auth, {'from': owner})
+    turboMaster.setDefaultSafeAuthority(auth)
+    yield turboMaster
