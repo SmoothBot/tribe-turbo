@@ -22,7 +22,7 @@ import {TurboSafe} from "./TurboSafe.sol";
 /// @dev Must be authorized to call the Turbo Fuse Pool's FuseAdmin.
 contract TurboMaster is Auth {
     using SafeTransferLib for ERC20;
-
+    event Debug(string);
     /*///////////////////////////////////////////////////////////////
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
@@ -179,6 +179,7 @@ contract TurboMaster is Auth {
     /// @param underlying The ERC20 token that the Safe should accept.
     /// @return safe The newly deployed Turbo Safe which accepts the provided underlying token.
     function createSafe(ERC20 underlying) external requiresAuth returns (TurboSafe safe, uint256 id) {
+        emit Debug("creating a new safe!");
         // Create a new Safe using the default authority and provided underlying token.
         safe = new TurboSafe(msg.sender, defaultSafeAuthority, underlying);
 

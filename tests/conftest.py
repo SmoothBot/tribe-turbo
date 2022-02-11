@@ -1,7 +1,5 @@
 import pytest
-from brownie import config
 from brownie import Contract
-
 
 @pytest.fixture
 def owner(accounts):
@@ -9,8 +7,8 @@ def owner(accounts):
 
 
 @pytest.fixture
-def auth(accounts):
-    yield accounts[1]
+def auth(MockAuthority, owner):
+    yield MockAuthority.deploy(owner, {'from': owner})
 
 
 # Rari contract addresses: https://docs.rari.capital/contracts/#rari-governance
@@ -28,10 +26,6 @@ def fuse_comptroller():
 def fuse_pool_directory():
     yield Contract('0x835482FE0532f169024d5E9410199369aAD5C77E')
 
-
-@pytest.fixture
-def fei(interface):
-    yield interface.ERC20('0x956F47F50A910163D8BF957Cf5846D573E7f87CA')
 
 @pytest.fixture
 def fei(interface):
@@ -58,10 +52,20 @@ def turbo_pool(fuse_pool_directory, fuse_comptroller, fuse_oracle, owner):
     pool = Contract.from_abi("Comptroller", addr, fuse_comptroller.abi)
 
     # TODO - Deploy CToken for fei and add market to our new fuse pool!??
-
+    
     yield pool
+
+@pytest.fixture
+def nefarious_turbo_master(NefariousTurboMaster, MockComptroller, fei, owner, auth):
+    mock_comptroller = MockComptroller.deploy({'from': owner})
+    turboMaster = NefariousTurboMaster.deploy(mock_comptroller, fei, owner, auth, {'from': owner})
+    turboMaster.setDefaultSafeAuthority(auth)
+    yield turboMaster
 
 
 @pytest.fixture
-def turbo_master(TurboMaster, turbo_pool, fei, owner, auth):
-    yield TurboMaster.deploy(turbo_pool, fei, owner, auth, {'from': owner})
+def turbo_master(TurboMaster, MockComptroller, fei, owner, auth):
+    mock_comptroller = MockComptroller.deploy({'from': owner})
+    turboMaster = TurboMaster.deploy(mock_comptroller, fei, owner, auth, {'from': owner})
+    turboMaster.setDefaultSafeAuthority(auth)
+    yield turboMaster

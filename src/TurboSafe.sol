@@ -23,6 +23,8 @@ contract TurboSafe is Auth, ERC4626, ReentrancyGuard {
     using SafeTransferLib for ERC20;
     using FixedPointMathLib for uint256;
 
+    event Debug(string);
+
     /*///////////////////////////////////////////////////////////////
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
@@ -65,6 +67,7 @@ contract TurboSafe is Auth, ERC4626, ReentrancyGuard {
             string(abi.encodePacked("ts", _underlying.symbol()))
         )
     {
+        emit Debug("Turbo Safe Constructor!");
         master = TurboMaster(msg.sender);
 
         fei = master.fei();
@@ -77,9 +80,11 @@ contract TurboSafe is Auth, ERC4626, ReentrancyGuard {
         feiTurboCToken = pool.cTokensByUnderlying(fei);
 
         underlyingTurboCToken = pool.cTokensByUnderlying(asset);
+        emit Debug("checking underlying c token...");
 
         // If the provided underlying is not supported by the Turbo Fuse Pool, revert.
         require(address(underlyingTurboCToken) != address(0), "UNSUPPORTED_UNDERLYING");
+        emit Debug("entering market...");
 
         // Construct an array of market(s) to enable as collateral.
         CERC20[] memory marketsToEnter = new CERC20[](1);
