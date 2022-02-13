@@ -62,12 +62,6 @@ def turbo_pool(fuse_pool_directory, fuse_comptroller, fuse_oracle, owner):
     
     yield pool
 
-@pytest.fixture
-def nefarious_turbo_master(NefariousTurboMaster, MockComptroller, fei, owner, auth):
-    mock_comptroller = MockComptroller.deploy({'from': owner})
-    turboMaster = NefariousTurboMaster.deploy(mock_comptroller, fei, owner, auth, {'from': owner})
-    turboMaster.setDefaultSafeAuthority(auth)
-    yield turboMaster
 
 @pytest.fixture
 def booster(TurboBooster, fei, uni, owner, auth):
