@@ -5,11 +5,18 @@ from brownie import Contract
 def owner(accounts):
     yield accounts[0]
 
+@pytest.fixture
+def attacker(accounts):
+    yield accounts[1]
+
 
 @pytest.fixture
 def auth(MockAuthority, owner):
     yield MockAuthority.deploy(owner, {'from': owner})
 
+@pytest.fixture
+def nefarious_vault(NefariousERC4626, fei, owner):
+    yield NefariousERC4626.deploy(fei, 'nefarious_vault', 'n_vault', {'from': owner})
 
 # Rari contract addresses: https://docs.rari.capital/contracts/#rari-governance
 @pytest.fixture
@@ -62,10 +69,16 @@ def nefarious_turbo_master(NefariousTurboMaster, MockComptroller, fei, owner, au
     turboMaster.setDefaultSafeAuthority(auth)
     yield turboMaster
 
+@pytest.fixture
+def booster(TurboBooster, fei, uni, owner, auth):
+    turboBooster = TurboBooster.deploy(owner, auth, {'from': owner})
+    yield turboBooster
+
 
 @pytest.fixture
-def turbo_master(TurboMaster, MockComptroller, fei, owner, auth):
+def turbo_master(TurboMaster, MockComptroller, booster, fei, owner, auth):
     mock_comptroller = MockComptroller.deploy({'from': owner})
     turboMaster = TurboMaster.deploy(mock_comptroller, fei, owner, auth, {'from': owner})
-    turboMaster.setDefaultSafeAuthority(auth)
+    turboMaster.setDefaultSafeAuthority(auth, {'from': owner})
+    turboMaster.setBooster(booster, {'from': owner})
     yield turboMaster
